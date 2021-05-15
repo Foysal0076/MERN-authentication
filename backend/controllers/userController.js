@@ -37,22 +37,15 @@ export const registerUser = asyncHandler(async (req, res) => {
     const ativationToken = generateActivationToken(user)
     const url = `${process.env.CLIENT_URL}/user/activate/${ativationToken}`
 
-    sendEmail(email, url)
+    sendEmail(email, url, 'Verify account')
 
     return res.json({ msg: "Register Success! Please activate your email to start." })
 
-    if (user) {
-        res.status(201).json({
-            _id: user._id,
-            name: user.name,
-            email: user.email,
-            isAdmin: user.iAdmin,
-        })
-    } else {
-        throw new ErrorResponse('Server Error', 500)
-    }
 })
 
+//@ route POST /api/v1/users/activate
+//@desc Activate email
+//@access Public
 export const activateEmail = asyncHandler(async (req, res) => {
     const { activation_token } = req.body
     const { user } = jwt.verify(activation_token, process.env.JWT_ACTIVATION_SECRET)
@@ -73,6 +66,9 @@ export const activateEmail = asyncHandler(async (req, res) => {
 
 })
 
+//@ route POST /api/v1/users/login
+//@desc Rturn access token
+//@access Public
 export const authUser = asyncHandler(async (req, res) => {
     const { email, password } = req.body
     if (!email || !password) {
@@ -97,6 +93,9 @@ export const authUser = asyncHandler(async (req, res) => {
     }
 })
 
+//@ route POST /api/v1/users/forgotpassword
+//@desc Reset password request
+//@access Public
 export const forgotPassowrd = asyncHandler(async (req, res) => {
     const { email } = req.body
     if (!email) {
@@ -117,6 +116,9 @@ export const forgotPassowrd = asyncHandler(async (req, res) => {
 
 })
 
+//@ route POST /api/v1/users/resetpassword
+//@desc Reset password
+//@access Private
 export const resetPassowrd = asyncHandler(async (req, res) => {
     const { password } = req.body
     if (!password) {
@@ -136,4 +138,82 @@ export const resetPassowrd = asyncHandler(async (req, res) => {
     })
 
     res.json({ success: true, message: 'Password has been changed successfully' })
+})
+
+//@ route GET /api/v1/users/userinfo
+//@desc Get user information
+//@access Private
+export const getUserInfo = asyncHandler(async (req, res) => {
+
+    const user = await User.findById(req.user.id).select('-password')
+    res.status(200).json({ success: true, data: user })
+
+})
+
+
+//@ route GET /api/v1/users
+//@desc Get all users
+//@access Admin
+export const getUsers = asyncHandler(async (req, res) => {
+
+    const pageSize = Number(req.query.per_page) || 5
+    const page = Number(req.query.page) || 1
+
+    const count = await User.countDocuments()
+
+    const users = await User.find({})
+        .limit(pageSize)
+        .skip(pageSize * (page - 1))
+        .select('-password')
+    res.status(200).json({
+        success: true,
+        count,
+        pages: Math.ceil(count / pageSize),
+        page: page,
+        data: users
+    })
+
+})
+
+//@ route PUT /api/v1/users
+//@desc Update user Information
+//@access protect
+export const updateUserInfo = asyncHandler(async (req, res) => {
+
+    const { name, avatar } = req.body
+
+    const user = await User.findById(req.user.id)
+
+    if (user) {
+        user.name = name || user.name
+        user.avatar = avatar || user.avatar
+    }
+
+    const updatedUser = await user.save()
+
+    res.status(204).json({ success: true, message: 'Update successful', data: updatedUser })
+
+})
+
+//@ route PUT /api/v1/users
+//@desc Update user Information
+//@access Admin
+export const updateUser = asyncHandler(async (req, res) => {
+
+    const { isAdmin } = req.body
+    await User.findByIdAndUpdate(req.params.id, {
+        isAdmin
+    })
+    res.status(204).json({ success: true, message: 'Update successful' })
+
+})
+
+//@ route PUT /api/v1/users/:id/delete
+//@desc Delete User
+//@access Admin
+export const deleteUser = asyncHandler(async (req, res) => {
+
+    await User.findByIdAndDelete(req.params.id)
+    res.status(204).json({ success: true, message: 'Delete successful' })
+
 })

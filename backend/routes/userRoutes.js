@@ -1,6 +1,6 @@
 import express from 'express'
-import { activateEmail, authUser, forgotPassowrd, registerUser, resetPassowrd } from '../controllers/userController.js'
-import { protect } from '../middleware/authMiddleware.js'
+import { activateEmail, authUser, deleteUser, forgotPassowrd, getUserInfo, getUsers, registerUser, resetPassowrd, updateUser, updateUserInfo } from '../controllers/userController.js'
+import { admin, protect } from '../middleware/authMiddleware.js'
 
 const router = express.Router()
 
@@ -23,5 +23,27 @@ router.route('/forgotpassword')
 //@route - /api/v1/users/resetpassword
 router.route('/resetpassword')
     .post(protect, resetPassowrd)
+
+//@route - /api/v1/users/userinfo
+router.route('/userinfo')
+    .get(protect, getUserInfo)
+
+//@route - /api/v1/users
+router.route('/')
+    .get(protect, admin, getUsers)
+
+//@route - /api/v1/users/update
+router.route('/update')
+    .put(protect, updateUserInfo)
+
+//@route - /api/v1/users/:id/update
+router.route('/:id/update')
+    .put(protect, admin, updateUser)
+
+//@route - /api/v1/users/:id/delete
+router.route('/:id/delete')
+    .put(protect, admin, deleteUser)
+
+
 
 export default router

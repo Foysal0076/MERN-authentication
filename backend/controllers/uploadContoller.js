@@ -13,12 +13,10 @@ export const uploadAvatar = asyncHandler(async (req, res) => {
     })
 
     const file = req.files.file
-    console.log(file.tempFilePath)
 
     cloudinary.v2.uploader.upload(file.tempFilePath, {
         folder: 'avatar', width: 150, height: 150, crop: 'fill'
     }, function (err, result) {
-
         if (err) throw err
         removeTempFile(file.tempFilePath)
         res.json({ url: result.secure_url })

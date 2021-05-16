@@ -39,7 +39,7 @@ export const registerUser = asyncHandler(async (req, res) => {
 
     sendEmail(email, url, 'Verify account')
 
-    return res.json({ msg: "Register Success! Please activate your email to start." })
+    return res.json({ message: "Register Success! Please activate your email to start." })
 
 })
 
@@ -112,7 +112,7 @@ export const forgotPassowrd = asyncHandler(async (req, res) => {
     const url = `${process.env.CLIENT_URL}/user/reset/${access_token}`
 
     sendEmail(email, url, 'Reset Your password')
-    res.status({ success: true, message: 'Re-send password, Please check your email inbox' })
+    res.status(200).json({ success: true, message: 'Please check your email inbox, Re-send password?' })
 
 })
 
@@ -175,7 +175,7 @@ export const getUsers = asyncHandler(async (req, res) => {
 
 })
 
-//@ route PUT /api/v1/users
+//@ route PUT /api/v1/users/update
 //@desc Update user Information
 //@access protect
 export const updateUserInfo = asyncHandler(async (req, res) => {
@@ -191,7 +191,7 @@ export const updateUserInfo = asyncHandler(async (req, res) => {
 
     const updatedUser = await user.save()
 
-    res.status(204).json({ success: true, message: 'Update successful', data: updatedUser })
+    res.status(200).json({ success: true, message: 'Update successful', data: updatedUser })
 
 })
 

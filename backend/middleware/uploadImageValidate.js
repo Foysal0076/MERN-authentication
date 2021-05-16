@@ -3,6 +3,7 @@ import ErrorResponse from '../utils/errorResponse.js'
 import asyncHandler from './asyncHandler.js'
 
 export const uploadImageValidate = asyncHandler(async (req, res, next) => {
+
     if (!req.files || Object.keys(req.files).length === 0) throw new ErrorResponse('No files choosen', 400)
 
     const file = req.files.file
@@ -12,11 +13,11 @@ export const uploadImageValidate = asyncHandler(async (req, res, next) => {
         throw new ErrorResponse('Size too large', 400)
     }
 
-    if (file.mimeType !== 'image/jpeg' && file.mimeType !== 'image/png') {
-        removeTempFile(file.tempFilePath)
-        throw new ErrorResponse('File format is invalid', 400)
-    }
-    
+    // if (file.mimeType !== 'image/jpeg' && file.mimeType !== 'image/png') {
+    //     removeTempFile(file.tempFilePath)
+    //     throw new ErrorResponse('File format is invalid', 400)
+    // }
+
     next()
 })
 

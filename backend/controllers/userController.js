@@ -6,6 +6,8 @@ import { generateAccessToken, generateActivationToken, } from '../utils/generate
 import sendEmail from "./sendMail.js"
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
+import { google } from 'googleapis'
+
 
 //@ route POST /api/v1/users
 //@desc Register new user
@@ -216,4 +218,57 @@ export const deleteUser = asyncHandler(async (req, res) => {
     await User.findByIdAndDelete(req.params.id)
     res.status(204).json({ success: true, message: 'Delete successful' })
 
+})
+
+//@ route PUT /api/v1/users/google_login
+//@desc Login using google credential
+//@access Public
+
+const { OAuth2 } = google.auth
+const client = new OAuth2(process.env.MAILING_SERVICE_CLIENT_ID)
+
+export const facebookLogin = asyncHandler(async (req, res) => {
+    const { tokenId } = req.body
+
+    const verify = await client.verifyIdToken({ idToken: tokenId, audience: process.env.MAILING_SERVICE_CLIENT_ID })
+
+    const { email_verified, email, name, picture } = verify.payload
+
+    const password = email + process.env.GOOGLE_SECRET
+
+    const passwordHash = await bcrypt.hash(password, 10)
+
+    if (!email_verified) throw new ErrorResponse('Email verification fail', 400)
+
+    const user = await User.findOne({ email })
+
+    if (user) {
+        const isMatch = await user.matchPassword(password)
+        if (!isMatch) throw new ErrorResponse('Password is incorrect', 400)
+
+        res.status(200).json({
+            _id: user._id,
+            email: user.email,
+            name: user.name,
+            avatar: user.avatar,
+            isAdmin: user.isAdmin,
+            token: generateAccessToken(user._id)
+        })
+    } else {
+        
+        const newUser = new User({
+            name, email, password: passwordHash, avatar: picture
+        })
+
+        await newUser.save()
+
+        res.status(200).json({
+            _id: newUser._id,
+            email: newUser.email,
+            name: newUser.name,
+            avatar: newUser.avatar,
+            isAdmin: newUser.isAdmin,
+            token: generateAccessToken(newUser._id)
+        })
+    }
 })

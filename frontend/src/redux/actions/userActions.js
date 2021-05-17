@@ -14,10 +14,7 @@ export const login = (email, password) => async (dispatch) => {
 
         const { data } = await axios.post('/api/v1/users/login', { email, password }, config)
 
-        dispatch({
-            type: USER_LOGIN_SUCCESS,
-            payload: data
-        })
+        dispatch(loginSuccess(data))
 
         localStorage.setItem('userInfo', JSON.stringify(data))
 
@@ -62,5 +59,12 @@ export const getUserInfo = () => async (dispatch, getState) => {
             type: USER_INFO_FAIL,
             payload: error.response && error.response.data.message ? error.response.data.message : error.message
         })
+    }
+}
+
+export const loginSuccess = (data) => {
+    return {
+        type: USER_LOGIN_SUCCESS,
+        payload: data
     }
 }

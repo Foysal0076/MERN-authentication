@@ -1,4 +1,5 @@
 @import './components/screens/users/userInfoScreen.css';
+@import './components/screens/auth/auth.css';
 
 main {
   position: relative;

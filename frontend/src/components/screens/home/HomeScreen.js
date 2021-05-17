@@ -1,19 +1,12 @@
-import React, { useEffect } from 'react'
-import { useSelector } from 'react-redux'
-
+import React from 'react'
 
 const HomeScreen = () => {
 
-    // const {loading, error, userInfo} = useSelector(state=>state.userLogin)
-
-    // useEffect(()=>{
-    //     if
-    // })
-
     return (
-        <h1 className="display-4">Home Screen</h1>
+        <>
+            <h4 className='p-4'  >Welcome to MERN Authentication application <span style={{ fontSize: '2rem' }} className='font-weight-bold text-info' >!</span></h4>
+        </>
     )
 }
-
 
 export default HomeScreen

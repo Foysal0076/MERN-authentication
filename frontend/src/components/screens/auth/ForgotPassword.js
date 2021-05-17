@@ -17,7 +17,6 @@ const ForgotPassword = () => {
 
     const [message, setMessage] = useState(null)
     const [error, setError] = useState(null)
-    const [loading, setLoading] = useState(null)
 
     const { register, handleSubmit, formState: { errors } } = useForm({
         resolver: yupResolver(schema)

@@ -23,13 +23,10 @@ const UserInfoScreen = () => {
 
     const [message, setMessage] = useState(null)
     const [error, setError] = useState(null)
+    const [avatarError, setAvatarError] = useState(null)
 
-    const [name, setName] = useState('')
-    const [email, setEmail] = useState('')
     const [avatar, setAvatar] = useState('')
 
-    const [avatarError, setAvatarError] = useState(null)
-    const [success, setSuccess] = useState('')
     const [loading, setLoading] = useState(false)
 
     const dispatch = useDispatch()
@@ -38,7 +35,7 @@ const UserInfoScreen = () => {
 
     const { userInfo: { token } } = useSelector(state => state.userLogin)
 
-    const { register, handleSubmit, formState: { errors } } = useForm({
+    const { register, handleSubmit, setValue, formState: { errors } } = useForm({
         resolver: yupResolver(schema)
     })
 
@@ -46,12 +43,14 @@ const UserInfoScreen = () => {
         if (!userInfo) {
             dispatch(getUserInfo())
         }
+
         if (userInfo) {
-            setName(userInfo.name)
-            setEmail(userInfo.email)
             setAvatar(userInfo.avatar)
+            setValue('name', userInfo.name)
+            setValue('email', userInfo.email)
         }
-    }, [userInfo, dispatch, message])
+
+    }, [userInfo, dispatch, message, setValue])
 
     const submitHandler = async (data) => {
 
@@ -59,15 +58,15 @@ const UserInfoScreen = () => {
 
         const config = {
             headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${userInfo.token}`,
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${userInfo.token}`,
             },
-          }
+        }
 
         try {
-            console.log(name)
+
             const { data: { message } } = await axios.put('/api/v1/users/update', { name }, config)
-            console.log(message)
+
             setMessage(message)
 
         } catch (error) {
@@ -79,7 +78,6 @@ const UserInfoScreen = () => {
         e.preventDefault()
 
         const file = e.target.files[0]
-        console.log(file)
 
         if (!file) return setAvatarError('No file Uploaded')
 
@@ -91,8 +89,6 @@ const UserInfoScreen = () => {
 
         const formData = new FormData()
         formData.append('file', file)
-
-        console.log(formData)
 
         setLoading(true)
 
@@ -120,7 +116,6 @@ const UserInfoScreen = () => {
             setLoading(false)
             setAvatarError(error.response.data.message || error.message)
         }
-
     }
 
     return (
@@ -130,78 +125,81 @@ const UserInfoScreen = () => {
                     <h2>User Profile</h2>
                     {message && <Message variant='success'>{message}</Message>}
                     {error && <Message variant='danger'>{error}</Message>}
-                    <Card className='mt-4 bg-light shadow'>
-                        <Card.Body className='d-flex flex-column' >
-                            <div className="avatar mx-auto">
-                                {loading ? <Loader /> : (
-                                    <>
-                                        <img src={avatar ? avatar : userInfo && userInfo.avatar} alt="avatar" />
-                                        <span >
-                                            <i className="fas fa-camera"></i>
-                                            <p>Change</p>
-                                            <input type="file"
-                                                name="file"
-                                                id="file_up"
-                                                accept='image/jpeg, image/png'
-                                                onChange={changeAvatar} />
-                                        </span>
-                                    </>
-                                )}
-                            </div>
+                    {avatarError && <Message variant='danger'>{avatarError}</Message>}
+                    {userInfoLoading ? <Loader /> : userInfoError ? (
+                        <Message variant='danger'>{userInfoError}</Message>
+                    ) : (
 
-                            <form noValidate onSubmit={handleSubmit((data) => submitHandler(data))} >
-
-                                <div className="form-group">
-                                    <label htmlFor="name">Name</label>
-                                    <input
-                                        type="text"
-                                        {...register('name')}
-                                        className={errors.name ? 'form-control is-invalid' : 'form-control'}
-                                        defaultValue={name}
-                                    />
-                                    {errors.name && <p className='invalid-feedback form-text' >{errors.name.message}</p>}
+                        <Card className='mt-4 bg-light shadow'>
+                            <Card.Body className='d-flex flex-column' >
+                                <div className="avatar mx-auto">
+                                    {loading ? <Loader /> : (
+                                        <>
+                                            <img src={avatar ? avatar : userInfo && userInfo.avatar} alt="avatar" />
+                                            <span >
+                                                <i className="fas fa-camera"></i>
+                                                <p>Change</p>
+                                                <input type="file"
+                                                    name="file"
+                                                    id="file_up"
+                                                    accept='image/jpeg, image/png'
+                                                    onChange={changeAvatar} />
+                                            </span>
+                                        </>
+                                    )}
                                 </div>
 
-                                <div className="form-group">
-                                    <label htmlFor="email">Email address</label>
-                                    <input
-                                        type="email"
-                                        {...register('email')}
-                                        className={errors.email ? 'form-control is-invalid' : 'form-control'}
-                                        defaultValue={email}
-                                        disabled
-                                    />
-                                    {errors.email && <p className='invalid-feedback form-text' >{errors.email.message}</p>}
-                                </div>
+                                <form noValidate onSubmit={handleSubmit((data) => submitHandler(data))} >
 
-                                <div className="form-group">
-                                    <label htmlFor="password">Password</label>
-                                    <input
-                                        type="password"
-                                        {...register('password')}
-                                        className={errors.password ? 'form-control is-invalid' : 'form-control'}
-                                    />
-                                    {errors.password && <p className='invalid-feedback form-text' >{errors.password.message}</p>}
-                                </div>
+                                    <div className="form-group">
+                                        <label htmlFor="name">Name</label>
+                                        <input
+                                            type="text"
+                                            {...register('name')}
+                                            className={errors.name ? 'form-control is-invalid' : 'form-control'}
+                                        />
+                                        {errors.name && <p className='invalid-feedback form-text' >{errors.name.message}</p>}
+                                    </div>
 
-                                <div className="form-group">
-                                    <label htmlFor="confirmPassword">Confirm Password</label>
-                                    <input
-                                        type="password"
-                                        {...register('confirmPassword')}
-                                        className={errors.confirmPassword ? 'form-control is-invalid' : 'form-control'}
-                                    />
-                                    {errors.confirmPassword && <p className='invalid-feedback form-text' >Password must match</p>}
-                                </div>
-                                <button type="submit" className="btn btn-primary w-100">Submit</button>
-                            </form>
-                        </Card.Body>
-                    </Card>
+                                    <div className="form-group">
+                                        <label htmlFor="email">Email address</label>
+                                        <input
+                                            type="email"
+                                            {...register('email')}
+                                            className={errors.email ? 'form-control is-invalid' : 'form-control'}
+                                            disabled
+                                        />
+                                        {errors.email && <p className='invalid-feedback form-text' >{errors.email.message}</p>}
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label htmlFor="password">Password</label>
+                                        <input
+                                            type="password"
+                                            {...register('password')}
+                                            className={errors.password ? 'form-control is-invalid' : 'form-control'}
+                                        />
+                                        {errors.password && <p className='invalid-feedback form-text' >{errors.password.message}</p>}
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label htmlFor="confirmPassword">Confirm Password</label>
+                                        <input
+                                            type="password"
+                                            {...register('confirmPassword')}
+                                            className={errors.confirmPassword ? 'form-control is-invalid' : 'form-control'}
+                                        />
+                                        {errors.confirmPassword && <p className='invalid-feedback form-text' >Password must match</p>}
+                                    </div>
+                                    <button type="submit" className="btn btn-primary w-100">Submit</button>
+                                </form>
+                            </Card.Body>
+                        </Card>
+                    )}
                 </Col>
             </Row>
         </>
     )
 }
-
 
 export default UserInfoScreen

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import axios from 'axios'
 import Message from '../../utils/Message'
 import FormContainer from '../../utils/FormContainer'
@@ -23,7 +23,6 @@ const ResetPassword = () => {
 
     const [message, setMessage] = useState(null)
     const [error, setError] = useState(null)
-    const [loading, setLoading] = useState(null)
 
     const { register, handleSubmit, formState: { errors } } = useForm({
         resolver: yupResolver(schema)

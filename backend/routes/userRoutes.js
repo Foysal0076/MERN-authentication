@@ -1,5 +1,5 @@
 import express from 'express'
-import { activateEmail, authUser, deleteUser, facebookLogin, forgotPassowrd, getUserInfo, getUsers, registerUser, resetPassowrd, updateUser, updateUserInfo } from '../controllers/userController.js'
+import { activateEmail, authUser, deleteUser, facebookLogin, forgotPassowrd, getUserInfo, getUsers, googleLogin, registerUser, resetPassowrd, updateUser, updateUserInfo } from '../controllers/userController.js'
 import { admin, protect } from '../middleware/authMiddleware.js'
 
 const router = express.Router()
@@ -18,6 +18,10 @@ router.route('/login')
 
 //@route - /api/v1/users/google_login
 router.route('/google_login')
+    .post(googleLogin)
+
+//@route - /api/v1/users/facebook_login
+router.route('/facebook_login')
     .post(facebookLogin)
 
 //@route - /api/v1/users/forgotpassword
